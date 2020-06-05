@@ -27,6 +27,13 @@ class DElement:
     def get_text(self):
         return self.component.get()
     
+    def set_text(self, text):
+        self.clear()
+        state = self.component.cget('state')
+        self.component.config(state=NORMAL) 
+        self.component.insert(0,text)
+        self.component.config(state=state)
+    
 class DLabel(DElement):
     def __init__(self, root, properties, fontsize, text):
         super().__init__(root, properties, fontsize)

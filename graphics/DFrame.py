@@ -1,6 +1,6 @@
 import tkinter
-from util.Objects import Schedule, Task
-from graphics.Elements import *
+from util.Objects import Schedule
+from graphics.DElements import *
 from graphics.DCanvas import DCanvas
 from util.Command_Handler import Command_Handler
 
@@ -13,8 +13,6 @@ class DFrame:
         self.schedule = Schedule(self)
         #add the elements to the window
         self.elements = self.create_elements()
-
-        self.schedule.add_task(Task('Test', 'Tuesday', 7, 14, 'Red'))
     
     def create_window(self, title):
         root = tkinter.Tk()
@@ -37,12 +35,13 @@ class DFrame:
         column, row = 5, 3
         elements['name_label'] = DLabel(self.root, (column, row-1, 1, 1), 22, 'Name')
         elements['name_text'] = DEntry(self.root, (column, row, 1, 1), 22)
-        labels = ['Convert', 'Save', 'New', 'Open']
+        labels = ['Convert', 'Save', 'New', 'Open', 'Delete']
         command = [
                 lambda: self.execute_command(2),
                 lambda: self.execute_command(3),
                 lambda: self.execute_command(4),
-                lambda: self.execute_command(5)
+                lambda: self.execute_command(5),
+                lambda: self.execute_command(6)
             ]
         for index, label in enumerate(labels):
             elements['{}_button'.format(label.lower())] = DButton(self.root, (column+2*(index+1), row, 1, 1), 22, label, command[index], 'we')
@@ -86,5 +85,6 @@ class DFrame:
     
     def execute_command(self, id, **kwargs):
         task = kwargs.get('task', None)
-        self.schedule = Command_Handler().execute_command(id, self.elements, self.schedule, task)
+        self.schedule = Command_Handler().execute_command(id, self, self.schedule, task)
+        self.elements['canvas'].component.delete('all')
         self.schedule.draw(self.elements['canvas'])

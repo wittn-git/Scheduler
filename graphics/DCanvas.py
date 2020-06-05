@@ -1,4 +1,4 @@
-from graphics.Elements import DElement
+from graphics.DElements import DElement
 from tkinter import Canvas
 
 class DCanvas(DElement):
@@ -24,4 +24,3 @@ class DCanvas(DElement):
     def draw_schedule(self, schedule):
         self.component.delete('all')
         schedule.draw(self)
-        

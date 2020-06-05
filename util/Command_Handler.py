@@ -1,10 +1,22 @@
-from util.Objects import Task
+from util.Objects import Task, Schedule
+import util.Morpher as Morpher
+import sys
+import os
+from pathlib import Path
+from tkinter import filedialog
+from PIL import Image
+import io
+
+path = ''
+if sys.platform.startswith('linux'): path = '{}/Documents/Scheduler/data/{}'.format(str(Path.home()), '{}')
+elif sys.platform.startswith('win'): path = '{}//Scheduler//data//{}'.format(str(Path.home()), '{}')
 
 class Command_Handler():
 
-    def execute_command(self, id, elements, schedule, task):
+    def execute_command(self, id, frame, schedule, task):
 
-        self.elements = elements
+        self.frame = frame
+        self.elements = frame.elements
         self.schedule = schedule
         self.task = task
 
@@ -15,21 +27,26 @@ class Command_Handler():
             3: self.save_schedule,
             4: self.new_schedule,
             5: self.open_schedule,
-            6: self.edit_task
+            6: self.delete_schedule,
+            7: self.edit_task
         }
 
-        print(elements)
         return commands.get(id)()
     
     def add_task(self):
-        name = self.elements['task_text'].get_text()
-        day = self.elements['day_combobox'].get_text()
-        time_from = int(self.elements['from_text'].get_text())
-        time_to = int(self.elements['to_text'].get_text())
-        color = self.elements['color_combobox'].get_text
+        try:
+            task_name = self.elements['task_text'].get_text()
+            day = self.elements['day_combobox'].get_text()
+            time_from = int(self.elements['from_text'].get_text())
+            time_to = int(self.elements['to_text'].get_text())
+            color = self.elements['color_combobox'].get_text()
 
-        task = Task(name, day, time_from, time_to, color)
-        self.schedule.add_task(task)
+            for name, element in self.elements.items():
+                if name != 'name_text': element.clear()
+            task = Task(task_name, day, time_from, time_to, color)
+            self.schedule.add_task(task)
+        except:
+            pass
         return self.schedule
 
     def remove_task(self):
@@ -38,16 +55,48 @@ class Command_Handler():
         return self.schedule
 
     def convert_schedule(self):
-        pass
+        canvas = self.elements['canvas']
+        t = canvas.component.bbox('all')
+        canvas.component.postscript(file='uncropped.ps', colormode='color')
+        img = Image.open('uncropped.ps')
+        img.save('uncropped.png') 
+        img = Image.open('uncropped.png')
+        img = img.crop(box = t)
+        img.save('cropped.png') 
+        return self.schedule
 
     def save_schedule(self):
-        pass
+        name = self.elements['name_text'].get_text()
+        json_object = Morpher.schedule_to_json(self.schedule)
+        schedule_file = open(path.format(name+'.json'), 'w')
+        schedule_file.write(json_object)
+        return self.schedule
 
     def new_schedule(self):
-        pass
+        for name, element in self.elements.items():
+            element.clear()
+        return Schedule(self.frame)
 
     def open_schedule(self):
-        pass
+        schedule_file = open(filedialog.askopenfilename(initialdir = path.format(''),title = "Select schedule",filetypes = (("json files","*.json"),)))
+        self.elements['name_text'].set_text(os.path.basename(schedule_file.name).replace('.json', ''))
+        return Morpher.json_to_schedule(schedule_file, self.frame)
+    
+    def delete_schedule(self):
+        name = self.elements['name_text'].get_text()
+        try:
+            os.remove(path.format(name+'.json'))
+        except:
+            pass
+        return self.new_schedule()
 
     def edit_task(self):
-        pass
+        self.schedule.remove_task(self.task, self.elements['canvas'])
+
+        self.elements['task_text'].set_text(self.task.name)
+        self.elements['day_combobox'].set_text(self.task.day)
+        self.elements['from_text'].set_text(self.task.time_from)
+        self.elements['to_text'].set_text(self.task.time_to)
+        self.elements['color_combobox'].set_text(self.task.color)
+
+        return self.schedule
