@@ -8,6 +8,8 @@ from PIL import Image
 import io
 import cv2
 import imutils
+import util.Time_Converter as Time_Converter
+import util.Message as Message
 
 path = ''
 if sys.platform.startswith('linux'): path = '{}/Documents/Scheduler/{}'.format(str(Path.home()), '{}/{}')
@@ -39,8 +41,8 @@ class Command_Handler():
         try:
             task_name = self.elements['task_text'].get_text()
             day = self.elements['day_combobox'].get_text()
-            time_from = int(self.elements['from_text'].get_text())
-            time_to = int(self.elements['to_text'].get_text())
+            time_from = Time_Converter.extract(self.elements['from_text'].get_text())
+            time_to = Time_Converter.extract(self.elements['to_text'].get_text())
             color = self.elements['color_combobox'].get_text()
 
             for name, element in self.elements.items():
@@ -48,7 +50,7 @@ class Command_Handler():
             task = Task(task_name, day, time_from, time_to, color)
             self.schedule.add_task(task)
         except:
-            pass
+            Message.show_error('Wrong input was inserted.')
         return self.schedule
 
     def remove_task(self):
@@ -72,8 +74,10 @@ class Command_Handler():
         img = img.convert('RGB')
         img.save(path.format('Schedules', name+'.pdf'))
 
-        #os.remove('data.ps')
-        #os.remove('data.jpg')
+        os.remove('data.ps')
+        os.remove('data.jpg')
+
+        Message.show_message('Schedule converted successfully.')
         return self.schedule
     
     def save_schedule(self):
@@ -106,8 +110,8 @@ class Command_Handler():
 
         self.elements['task_text'].set_text(self.task.name)
         self.elements['day_combobox'].set_text(self.task.day)
-        self.elements['from_text'].set_text(self.task.time_from)
-        self.elements['to_text'].set_text(self.task.time_to)
+        self.elements['from_text'].set_text(Time_Converter.format(self.task.time_from))
+        self.elements['to_text'].set_text(Time_Converter.format(self.task.time_to))
         self.elements['color_combobox'].set_text(self.task.color)
 
         return self.schedule
