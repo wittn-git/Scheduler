@@ -6,10 +6,12 @@ from pathlib import Path
 from tkinter import filedialog
 from PIL import Image
 import io
+import cv2
+import imutils
 
 path = ''
-if sys.platform.startswith('linux'): path = '{}/Documents/Scheduler/data/{}'.format(str(Path.home()), '{}')
-elif sys.platform.startswith('win'): path = '{}//Scheduler//data//{}'.format(str(Path.home()), '{}')
+if sys.platform.startswith('linux'): path = '{}/Documents/Scheduler/{}'.format(str(Path.home()), '{}/{}')
+elif sys.platform.startswith('win'): path = '{}//Scheduler//{}'.format(str(Path.home()), '{}//{}')
 
 class Command_Handler():
 
@@ -55,20 +57,29 @@ class Command_Handler():
         return self.schedule
 
     def convert_schedule(self):
+        name = self.elements['name_text'].get_text()
         canvas = self.elements['canvas']
-        t = canvas.component.bbox('all')
-        canvas.component.postscript(file='uncropped.ps', colormode='color')
-        img = Image.open('uncropped.ps')
-        img.save('uncropped.png') 
-        img = Image.open('uncropped.png')
-        img = img.crop(box = t)
-        img.save('cropped.png') 
-        return self.schedule
 
+        canvas.canvas.postscript(file='data.ps', colormode='color')
+        img = Image.open('data.ps')
+        img.save('data.png', quality = 200)
+        
+        img = cv2.imread('data.png')
+        img = imutils.rotate_bound(img, 90)
+        cv2.imwrite('data.png', img)
+
+        img = Image.open('data.png')
+        img = img.convert('RGB')
+        img.save(path.format('Schedules', name+'.pdf'))
+
+        #os.remove('data.ps')
+        #os.remove('data.jpg')
+        return self.schedule
+    
     def save_schedule(self):
         name = self.elements['name_text'].get_text()
         json_object = Morpher.schedule_to_json(self.schedule)
-        schedule_file = open(path.format(name+'.json'), 'w')
+        schedule_file = open(path.format('data', name+'.json'), 'w')
         schedule_file.write(json_object)
         return self.schedule
 
@@ -78,14 +89,14 @@ class Command_Handler():
         return Schedule(self.frame)
 
     def open_schedule(self):
-        schedule_file = open(filedialog.askopenfilename(initialdir = path.format(''),title = "Select schedule",filetypes = (("json files","*.json"),)))
+        schedule_file = open(filedialog.askopenfilename(initialdir = path.format('data', ''),title = "Select schedule",filetypes = (("json files","*.json"),)))
         self.elements['name_text'].set_text(os.path.basename(schedule_file.name).replace('.json', ''))
         return Morpher.json_to_schedule(schedule_file, self.frame)
     
     def delete_schedule(self):
         name = self.elements['name_text'].get_text()
         try:
-            os.remove(path.format(name+'.json'))
+            os.remove(path.format('data', name+'.json'))
         except:
             pass
         return self.new_schedule()

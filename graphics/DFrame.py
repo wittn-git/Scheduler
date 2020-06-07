@@ -86,5 +86,5 @@ class DFrame:
     def execute_command(self, id, **kwargs):
         task = kwargs.get('task', None)
         self.schedule = Command_Handler().execute_command(id, self, self.schedule, task)
-        self.elements['canvas'].component.delete('all')
+        self.elements['canvas'].canvas.delete('all')
         self.schedule.draw(self.elements['canvas'])

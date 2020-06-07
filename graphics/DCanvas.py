@@ -8,19 +8,20 @@ class DCanvas(DElement):
         self.component = Canvas(root, width=root.winfo_screenwidth(), height=root.winfo_screenheight())
         
     def set_properties(self, elements):
-        padding = 35
+        padding = 25
 
         elements['name_text'].component.update()
         elements['task_label'].component.update()
 
-        self.base_x = padding
-        self.base_y = elements['name_text'].component.winfo_rooty()+padding
-        self.max_w = elements['task_label'].component.winfo_rootx()-padding-self.base_x
-        self.max_h = self.root.winfo_screenheight()-self.base_y-padding*3
+        base_x = padding
+        base_y = elements['name_text'].component.winfo_rooty()+padding
 
-    def point(self, x, y):
-        return (self.base_x+x, self.base_y+y)
+        self.w = elements['task_label'].component.winfo_rootx()-padding-base_x
+        self.h = self.root.winfo_screenheight()-base_y-padding*3
+
+        self.canvas = Canvas(self.component)
+        self.canvas.place(x=base_x, y=base_y, width=self.w, height=self.h)
 
     def draw_schedule(self, schedule):
-        self.component.delete('all')
+        self.canvas.delete('all')
         schedule.draw(self)
