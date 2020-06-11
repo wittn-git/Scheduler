@@ -8,5 +8,4 @@ def format(time):
 def extract(time):
     minutes, hours = math.modf(float(time))
     minutes = (round(minutes, 2)*100)/60
-    print(hours+minutes)
     return hours+minutes

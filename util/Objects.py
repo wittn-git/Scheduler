@@ -53,7 +53,7 @@ class Task:
         self.time_to = time_to
         self.color = color
         self.day_index = day_list.index(day)
-        self.id = '{}-{}-{}-{}-{}'.format(name, day, time_from, time_to, color)
+        self.id = '{}-{}-{}-{}-{}'.format(name.replace(' ', ''), day, time_from, time_to, color)
     
     def draw(self, canvas, frame):
         

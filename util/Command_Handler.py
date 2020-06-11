@@ -75,7 +75,7 @@ class Command_Handler():
         img.save(path.format('Schedules', name+'.pdf'))
 
         os.remove('data.ps')
-        os.remove('data.jpg')
+        os.remove('data.png')
 
         Message.show_message('Schedule converted successfully.')
         return self.schedule

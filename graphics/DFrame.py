@@ -53,7 +53,7 @@ class DFrame:
                     ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
                     None,
                     None,
-                    ('Blue', 'Red', 'Green')
+                    ('Cyan', 'Red', 'Green', 'Purple', 'Yellow', 'Magenta')
                 ]  
         for index, label in enumerate(labels):
             elements['{}_label'.format(label.lower())] = DLabel(self.root, (column, row+2*index, 1, 1), 22, label)
